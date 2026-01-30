@@ -1,0 +1,113 @@
+openapi: 3.0.3
+info:
+  title: User Registration API
+  description: API для регистрации пользователя при нажатии кнопки Register на фронтенде
+  version: 1.0.0
+
+servers:
+  - url: https://api.example.com
+
+paths:
+  /api/v1/users/register:
+    post:
+      summary: User registration
+      description: Создание нового пользователя в системе
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - firstName
+                - lastName
+                - username
+                - password
+                - captchaToken
+              properties:
+                firstName:
+                  type: string
+                  minLength: 1
+                  maxLength: 50
+                  description: Имя пользователя
+                lastName:
+                  type: string
+                  minLength: 1
+                  maxLength: 50
+                  description: Фамилия пользователя
+                username:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  description: Уникальный логин пользователя
+                password:
+                  type: string
+                  minLength: 8
+                  description: Пароль пользователя
+                captchaToken:
+                  type: string
+                  description: Токен проверки captcha
+      responses:
+        "201":
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - userId
+                  - message
+                properties:
+                  userId:
+                    type: string
+                    format: uuid
+                    description: Уникальный идентификатор пользователя
+                  message:
+                    type: string
+                    description: Результат выполнения операции
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Captcha validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Password does not meet security requirements
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - errorCode
+        - errorMessage
+      properties:
+        errorCode:
+          type: string
+          description: Машинно читаемый код ошибки
+        errorMessage:
+          type: string
+          description: Описание ошибки для клиента
